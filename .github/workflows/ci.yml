@@ -66,8 +66,8 @@ jobs:
       - name: Next.js build validation
         run: npm run build
         env:
-          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_dummy_key_for_ci_build_validation_only
-          CLERK_SECRET_KEY: sk_test_dummy_key_for_ci_build_validation_only
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || 'pk_test_YXdha2UtdGFwaXItNTQyMS5jbGVyay5hY2NvdW50cy5kZXYk' }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY || 'sk_test_mock_clerk_secret_key_ci_validation' }}
           NEXT_PUBLIC_API_URL: https://dummy.execute-api.us-west-2.amazonaws.com
 
   terraform-ci:
