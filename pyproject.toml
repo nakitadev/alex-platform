@@ -1,0 +1,28 @@
+[project]
+name = "alex-platform"
+version = "0.2.0"
+description = "Alex - Enterprise Multi-Agent SaaS Financial Planning Platform"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[workspace]
+members = [
+    "libs/*",
+    "services/agents/*",
+    "services/api",
+    "services/researcher",
+    "services/ingest",
+    "services/scheduler",
+    "scripts"
+]
+
+[tool.uv]
+managed = true
+
+[tool.pytest.ini_options]
+testpaths = ["services", "libs", "tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
