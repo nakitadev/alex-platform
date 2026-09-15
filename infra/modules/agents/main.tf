@@ -205,8 +205,8 @@ resource "aws_s3_object" "lambda_packages" {
 
   bucket = aws_s3_bucket.lambda_packages.id
   key    = "${each.key}/${each.key}_lambda.zip"
-  source = "${path.module}/../../backend/${each.key}/${each.key}_lambda.zip"
-  etag   = fileexists("${path.module}/../../backend/${each.key}/${each.key}_lambda.zip") ? filemd5("${path.module}/../../backend/${each.key}/${each.key}_lambda.zip") : null
+  source = "${path.module}/../../../dist/${each.key}_lambda.zip"
+  etag   = fileexists("${path.module}/../../../dist/${each.key}_lambda.zip") ? filemd5("${path.module}/../../../dist/${each.key}_lambda.zip") : null
 
   tags = {
     Project = "alex"
@@ -227,7 +227,7 @@ resource "aws_lambda_function" "planner" {
   # Using S3 for deployment package (>50MB)
   s3_bucket        = aws_s3_bucket.lambda_packages.id
   s3_key           = aws_s3_object.lambda_packages["planner"].key
-  source_code_hash = fileexists("${path.module}/../../backend/planner/planner_lambda.zip") ? filebase64sha256("${path.module}/../../backend/planner/planner_lambda.zip") : null
+  source_code_hash = fileexists("${path.module}/../../../dist/planner_lambda.zip") ? filebase64sha256("${path.module}/../../../dist/planner_lambda.zip") : null
 
   handler     = "lambda_handler.lambda_handler"
   runtime     = "python3.12"
@@ -281,7 +281,7 @@ resource "aws_lambda_function" "tagger" {
   # Using S3 for deployment package (>50MB)
   s3_bucket        = aws_s3_bucket.lambda_packages.id
   s3_key           = aws_s3_object.lambda_packages["tagger"].key
-  source_code_hash = fileexists("${path.module}/../../backend/tagger/tagger_lambda.zip") ? filebase64sha256("${path.module}/../../backend/tagger/tagger_lambda.zip") : null
+  source_code_hash = fileexists("${path.module}/../../../dist/tagger_lambda.zip") ? filebase64sha256("${path.module}/../../../dist/tagger_lambda.zip") : null
 
   handler     = "lambda_handler.lambda_handler"
   runtime     = "python3.12"
@@ -324,7 +324,7 @@ resource "aws_lambda_function" "reporter" {
   # Using S3 for deployment package (>50MB)
   s3_bucket        = aws_s3_bucket.lambda_packages.id
   s3_key           = aws_s3_object.lambda_packages["reporter"].key
-  source_code_hash = fileexists("${path.module}/../../backend/reporter/reporter_lambda.zip") ? filebase64sha256("${path.module}/../../backend/reporter/reporter_lambda.zip") : null
+  source_code_hash = fileexists("${path.module}/../../../dist/reporter_lambda.zip") ? filebase64sha256("${path.module}/../../../dist/reporter_lambda.zip") : null
 
   handler     = "lambda_handler.lambda_handler"
   runtime     = "python3.12"
@@ -368,7 +368,7 @@ resource "aws_lambda_function" "charter" {
   # Using S3 for deployment package (>50MB)
   s3_bucket        = aws_s3_bucket.lambda_packages.id
   s3_key           = aws_s3_object.lambda_packages["charter"].key
-  source_code_hash = fileexists("${path.module}/../../backend/charter/charter_lambda.zip") ? filebase64sha256("${path.module}/../../backend/charter/charter_lambda.zip") : null
+  source_code_hash = fileexists("${path.module}/../../../dist/charter_lambda.zip") ? filebase64sha256("${path.module}/../../../dist/charter_lambda.zip") : null
 
   handler     = "lambda_handler.lambda_handler"
   runtime     = "python3.12"
@@ -411,7 +411,7 @@ resource "aws_lambda_function" "retirement" {
   # Using S3 for deployment package (>50MB)
   s3_bucket        = aws_s3_bucket.lambda_packages.id
   s3_key           = aws_s3_object.lambda_packages["retirement"].key
-  source_code_hash = fileexists("${path.module}/../../backend/retirement/retirement_lambda.zip") ? filebase64sha256("${path.module}/../../backend/retirement/retirement_lambda.zip") : null
+  source_code_hash = fileexists("${path.module}/../../../dist/retirement_lambda.zip") ? filebase64sha256("${path.module}/../../../dist/retirement_lambda.zip") : null
 
   handler     = "lambda_handler.lambda_handler"
   runtime     = "python3.12"

@@ -1,14 +1,12 @@
-#!/usr/bin/env python3
 """
-Deploy all Part 6 Lambda functions to AWS using Terraform.
+Deploy all Lambda functions to AWS using Terraform.
 This script ensures Lambda functions are properly updated by:
-1. Optionally packaging the Lambda functions
+1. Optionally packaging the Lambda functions into dist/
 2. Tainting Lambda resources in Terraform to force recreation
 3. Running terraform apply to deploy with the latest code
 
 Usage:
-    cd backend
-    uv run deploy_all_lambdas.py [--package]
+    uv run scripts/deploy/deploy_agents.py [--package]
     
 Options:
     --package    Force re-packaging of all Lambda functions before deployment
@@ -19,7 +17,7 @@ import sys
 import subprocess
 import os
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 def taint_and_deploy_via_terraform() -> bool:
     """
@@ -28,13 +26,8 @@ def taint_and_deploy_via_terraform() -> bool:
     Returns:
         True if successful, False otherwise
     """
-    # Locate terraform directory (supports infra/modules/agents and legacy terraform/6_agents)
     project_root = Path(__file__).resolve().parent.parent.parent
-    possible_tf_dirs = [
-        project_root / "infra" / "modules" / "agents",
-        project_root / "terraform" / "6_agents",
-    ]
-    terraform_dir = next((d for d in possible_tf_dirs if d.exists()), possible_tf_dirs[0])
+    terraform_dir = project_root / "infra" / "modules" / "agents"
     if not terraform_dir.exists():
         print(f"❌ Terraform directory not found: {terraform_dir}")
         return False

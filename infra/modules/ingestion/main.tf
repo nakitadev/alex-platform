@@ -143,8 +143,8 @@ resource "aws_lambda_function" "ingest" {
   role          = aws_iam_role.lambda_role.arn
 
   # Note: The deployment package will be created by the guide instructions
-  filename         = "${path.module}/../../backend/ingest/lambda_function.zip"
-  source_code_hash = fileexists("${path.module}/../../backend/ingest/lambda_function.zip") ? filebase64sha256("${path.module}/../../backend/ingest/lambda_function.zip") : null
+  filename         = "${path.module}/../../../dist/ingest_lambda.zip"
+  source_code_hash = fileexists("${path.module}/../../../dist/ingest_lambda.zip") ? filebase64sha256("${path.module}/../../../dist/ingest_lambda.zip") : null
 
   handler     = "ingest_s3vectors.lambda_handler"
   runtime     = "python3.12"

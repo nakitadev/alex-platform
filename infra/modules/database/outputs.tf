@@ -51,11 +51,10 @@ output "setup_instructions" {
       --sql "SELECT version()"
     
     To set up the database schema:
-    cd backend/database
-    uv run run_migrations.py
+    uv run scripts/db/run_migrations.py
     
     To load sample data:
-    uv run reset_db.py --with-test-data
+    uv run scripts/db/reset_db.py --with-test-data
     
     💰 Cost Management:
     - Current scaling: ${var.min_capacity} - ${var.max_capacity} ACUs

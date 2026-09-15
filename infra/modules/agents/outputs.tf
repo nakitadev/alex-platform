@@ -35,16 +35,14 @@ output "setup_instructions" {
     SQS Queue: ${aws_sqs_queue.analysis_jobs.name}
     
     To test the system:
-    1. First, package and deploy each agent's code:
-       cd backend/planner && uv run package_docker.py --deploy
-       cd backend/tagger && uv run package_docker.py --deploy
-       cd backend/reporter && uv run package_docker.py --deploy
-       cd backend/charter && uv run package_docker.py --deploy
-       cd backend/retirement && uv run package_docker.py --deploy
+    1. First, package all agents:
+       uv run scripts/build/package_lambda.py --all
     
-    2. Run the full integration test:
-       cd backend/planner
-       uv run run_full_test.py
+    2. Deploy or update agents:
+       uv run scripts/deploy/deploy_agents.py
+    
+    3. Run the integration tests:
+       uv run scripts/test/test_full.py
     
     3. Monitor progress in CloudWatch Logs:
        - /aws/lambda/alex-planner

@@ -192,8 +192,8 @@ resource "aws_lambda_function" "scheduler_lambda" {
   count            = local.scheduler_active ? 1 : 0
   function_name    = "alex-researcher-scheduler"
   role             = aws_iam_role.lambda_scheduler_role[0].arn
-  filename         = "${path.module}/../../backend/scheduler/lambda_function.zip"
-  source_code_hash = fileexists("${path.module}/../../backend/scheduler/lambda_function.zip") ? filebase64sha256("${path.module}/../../backend/scheduler/lambda_function.zip") : null
+  filename         = "${path.module}/../../../dist/scheduler_lambda.zip"
+  source_code_hash = fileexists("${path.module}/../../../dist/scheduler_lambda.zip") ? filebase64sha256("${path.module}/../../../dist/scheduler_lambda.zip") : null
   handler          = "lambda_function.handler"
   runtime          = "python3.12"
   timeout          = 180
