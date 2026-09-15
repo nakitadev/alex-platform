@@ -21,6 +21,10 @@ on:
           - dev
           - prod
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build-and-package:
     name: Package Lambda Functions
@@ -79,15 +83,15 @@ jobs:
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
 
-      - name: Configure AWS Credentials
-        if: env.AWS_ACCESS_KEY_ID != ''
+      - name: Configure AWS Credentials (OIDC Role)
+        if: env.AWS_ROLE_ARN != ''
         uses: aws-actions/configure-aws-credentials@v4
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION || 'us-west-2' }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: github-actions-alex-deploy
+          aws-region: ${{ secrets.DEFAULT_AWS_REGION || secrets.AWS_REGION || 'ap-southeast-1' }}
 
       - name: Sync static files to S3 & Invalidate CloudFront
         if: env.S3_BUCKET_NAME != ''
