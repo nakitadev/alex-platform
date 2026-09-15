@@ -28,8 +28,13 @@ def taint_and_deploy_via_terraform() -> bool:
     Returns:
         True if successful, False otherwise
     """
-    # Change to terraform directory
-    terraform_dir = Path(__file__).parent.parent / "terraform" / "6_agents"
+    # Locate terraform directory (supports infra/modules/agents and legacy terraform/6_agents)
+    project_root = Path(__file__).resolve().parent.parent.parent
+    possible_tf_dirs = [
+        project_root / "infra" / "modules" / "agents",
+        project_root / "terraform" / "6_agents",
+    ]
+    terraform_dir = next((d for d in possible_tf_dirs if d.exists()), possible_tf_dirs[0])
     if not terraform_dir.exists():
         print(f"❌ Terraform directory not found: {terraform_dir}")
         return False
@@ -78,7 +83,7 @@ def taint_and_deploy_via_terraform() -> bool:
         print("❌ Terraform deployment failed!")
         return False
 
-def package_lambda(service_name: str, service_dir: Path) -> bool:
+def package_lambda(service_name: str, service_dir: Optional[Path] = None) -> bool:
     """
     Package a Lambda function using package_docker.py.
     
@@ -89,38 +94,33 @@ def package_lambda(service_name: str, service_dir: Path) -> bool:
     Returns:
         True if successful, False otherwise
     """
-    print(f"   📦 Packaging {service_name}...")
-    
-    package_script = service_dir / 'package_docker.py'
-    if not package_script.exists():
-        print(f"      ✗ package_docker.py not found in {service_dir}")
-        return False
+    project_root = Path(__file__).resolve().parent.parent.parent
+    packager_script = project_root / "scripts" / "build" / "package_lambda.py"
+    dist_dir = project_root / "dist"
     
     try:
-        # Run uv run package_docker.py in the service directory
         result = subprocess.run(
-            ['uv', 'run', 'package_docker.py'],
-            cwd=service_dir,
+            ['uv', 'run', str(packager_script), '--target', service_name],
+            cwd=str(project_root),
             capture_output=True,
             text=True
         )
         
         if result.returncode == 0:
-            # Check if zip was created
-            zip_path = service_dir / f'{service_name}_lambda.zip'
+            zip_path = dist_dir / f'{service_name}_lambda.zip'
             if zip_path.exists():
                 size_mb = zip_path.stat().st_size / (1024 * 1024)
                 print(f"      ✓ Created {size_mb:.1f} MB package")
                 return True
             else:
-                print(f"      ✗ Package not created")
+                print(f"      ✗ Package not created at {zip_path}")
                 return False
         else:
-            print(f"      ✗ Packaging failed: {result.stderr}")
+            print(f"      ✗ Packaging failed:\n{result.stderr}")
             return False
             
     except Exception as e:
-        print(f"      ✗ Error running package_docker.py: {e}")
+        print(f"      ✗ Error running package_lambda.py: {e}")
         return False
 
 def main():
@@ -146,32 +146,28 @@ def main():
     print()
     
     # Define Lambda functions to check/package
-    backend_dir = Path(__file__).parent
-    services = [
-        ('planner', backend_dir / 'planner' / 'planner_lambda.zip'),
-        ('tagger', backend_dir / 'tagger' / 'tagger_lambda.zip'),
-        ('reporter', backend_dir / 'reporter' / 'reporter_lambda.zip'),
-        ('charter', backend_dir / 'charter' / 'charter_lambda.zip'),
-        ('retirement', backend_dir / 'retirement' / 'retirement_lambda.zip'),
-    ]
+    project_root = Path(__file__).resolve().parent.parent.parent
+    dist_dir = project_root / "dist"
+    dist_dir.mkdir(parents=True, exist_ok=True)
+    
+    agents = ['planner', 'tagger', 'reporter', 'charter', 'retirement']
+    services = [(agent, dist_dir / f'{agent}_lambda.zip') for agent in agents]
     
     # Check if packages exist and optionally package them
     print("📋 Checking deployment packages...")
     services_to_package = []
     
     for service_name, zip_path in services:
-        service_dir = backend_dir / service_name
-        
         if force_package:
             # Force re-packaging all services
-            services_to_package.append((service_name, service_dir))
+            services_to_package.append(service_name)
             print(f"   ⟳ {service_name}: Will re-package")
         elif zip_path.exists():
             size_mb = zip_path.stat().st_size / (1024 * 1024)
             print(f"   ✓ {service_name}: {size_mb:.1f} MB")
         else:
             print(f"   ✗ {service_name}: Not found")
-            services_to_package.append((service_name, service_dir))
+            services_to_package.append(service_name)
     
     # Package missing or all services if requested
     if services_to_package:
@@ -179,8 +175,8 @@ def main():
         print("📦 Packaging Lambda functions...")
         failed_packages = []
         
-        for service_name, service_dir in services_to_package:
-            if not package_lambda(service_name, service_dir):
+        for service_name in services_to_package:
+            if not package_lambda(service_name):
                 failed_packages.append(service_name)
         
         if failed_packages:

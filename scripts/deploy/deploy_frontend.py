@@ -175,7 +175,12 @@ def deploy_terraform():
     """Deploy infrastructure with Terraform."""
     print("\n🏗️  Deploying infrastructure with Terraform...")
 
-    terraform_dir = Path(__file__).parent.parent / "terraform" / "7_frontend"
+    project_root = Path(__file__).resolve().parent.parent.parent
+    possible_dirs = [
+        project_root / "infra" / "modules" / "frontend",
+        project_root / "terraform" / "7_frontend",
+    ]
+    terraform_dir = next((d for d in possible_dirs if d.exists()), possible_dirs[0])
 
     if not terraform_dir.exists():
         print(f"  ❌ Terraform directory not found: {terraform_dir}")
