@@ -84,22 +84,25 @@ jobs:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
 
       - name: Configure AWS Credentials (OIDC Role)
-        if: env.AWS_ROLE_ARN != ''
         uses: aws-actions/configure-aws-credentials@v4
-        env:
-          AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           role-session-name: github-actions-alex-deploy
           aws-region: ${{ secrets.DEFAULT_AWS_REGION || secrets.AWS_REGION || 'ap-southeast-1' }}
 
       - name: Sync static files to S3 & Invalidate CloudFront
-        if: env.S3_BUCKET_NAME != ''
         env:
-          S3_BUCKET_NAME: ${{ secrets.FRONTEND_S3_BUCKET }}
-          CLOUDFRONT_DIST_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+          S3_BUCKET_NAME: ${{ secrets.FRONTEND_S3_BUCKET || 'alex-frontend-202518310695' }}
+          CLOUDFRONT_DIST_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID || 'E1S3NBWUEGT02J' }}
         run: |
           aws s3 sync out/ s3://${S3_BUCKET_NAME}/ --delete
           if [ -n "${CLOUDFRONT_DIST_ID}" ]; then
             aws cloudfront create-invalidation --distribution-id ${CLOUDFRONT_DIST_ID} --paths "/*"
           fi
+
+      - name: Display Deployment Summary
+        run: |
+          echo "## 🚀 Deployment Result" >> $GITHUB_STEP_SUMMARY
+          echo "- 🌐 **Frontend URL:** https://d3bakbmwmkfblf.cloudfront.net" >> $GITHUB_STEP_SUMMARY
+          echo "- 📦 **S3 Bucket:** \`alex-frontend-202518310695\`" >> $GITHUB_STEP_SUMMARY
+          echo "- ⚡ **CloudFront Distribution ID:** \`E1S3NBWUEGT02J\`" >> $GITHUB_STEP_SUMMARY
