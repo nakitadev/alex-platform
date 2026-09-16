@@ -100,6 +100,28 @@ def update_lambda_env(cluster_arn: str, secret_arn: str, region: str):
             print(f"  ⚠️ Lambda {func} not found in AWS, skipping")
         except Exception as e:
             print(f"  ⚠️ Warning updating {func}: {e}")
+def update_iam_policies(secret_arn: str, region: str):
+    """Update IAM policies to allow access to the new Aurora Secret."""
+    print("\n🔐 Updating IAM policies with Secret ARN access...")
+    iam_client = boto3.client("iam", region_name=region)
+    roles_policies = [
+        ("alex-api-lambda-role", "alex-api-lambda-aurora"),
+        ("alex-lambda-agents-role", "alex-lambda-agents-policy")
+    ]
+    for role, policy_name in roles_policies:
+        try:
+            policy = iam_client.get_role_policy(RoleName=role, PolicyName=policy_name)["PolicyDocument"]
+            for stmt in policy.get("Statement", []):
+                if "secretsmanager:GetSecretValue" in stmt.get("Action", []):
+                    stmt["Resource"] = "arn:aws:secretsmanager:ap-southeast-1:202518310695:secret:alex-aurora-credentials-*"
+            iam_client.put_role_policy(
+                RoleName=role,
+                PolicyName=policy_name,
+                PolicyDocument=json.dumps(policy)
+            )
+            print(f"  ✓ Updated IAM policy for {role}")
+        except Exception as e:
+            print(f"  ⚠️ Warning updating {role} policy: {e}")
 
 def main():
     print("🚀 ALEX - Deploy Aurora Serverless v2 Database")
@@ -147,6 +169,9 @@ def main():
 
     # 5. Update Lambda configs
     update_lambda_env(cluster_arn, secret_arn, region)
+
+    # 6. Update IAM policies
+    update_iam_policies(secret_arn, region)
 
     # 6. Run Migrations & Seed Data
     print("\n🗄️ Step 4: Running Database Migrations & Seeding Initial Data...")
