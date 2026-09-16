@@ -1,5 +1,7 @@
 # Alex - Enterprise Multi-Agent SaaS Financial Planning Platform
 
+![Alex Multi-Agent SaaS Financial Platform](alex-multi-agent-saas-financial-platform.jpeg)
+
 Alex (Agentic Learning Equities eXplainer) is a production-grade multi-agent SaaS financial planning system built with AWS Serverless, Bedrock Nova Pro, S3 Vectors, and Next.js.
 
 ## Architecture Highlights
