@@ -26,9 +26,6 @@ if not cluster_arn or not secret_arn:
 
 client = boto3.client("rds-data", region_name=region)
 
-# Read migration file
-with open("migrations/001_schema.sql") as f:
-    sql = f.read()
 
 # Define statements in order (since splitting is complex)
 statements = [

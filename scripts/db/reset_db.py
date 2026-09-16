@@ -10,9 +10,14 @@ import argparse
 
 sys.stdout.reconfigure(encoding="utf-8")
 from pathlib import Path
-from src.client import DataAPIClient
-from src.models import Database
-from src.schemas import UserCreate, AccountCreate, PositionCreate
+
+from alex_database import (
+    DataAPIClient,
+    Database,
+    UserCreate,
+    AccountCreate,
+    PositionCreate
+)
 from decimal import Decimal
 
 
@@ -163,9 +168,11 @@ def main():
         # Drop all tables
         drop_all_tables(db)
         
+        script_dir = Path(__file__).resolve().parent
+
         # Run migrations
         print("\n📝 Running migrations...")
-        result = subprocess.run(['uv', 'run', 'run_migrations.py'],
+        result = subprocess.run(['uv', 'run', str(script_dir / 'run_migrations.py')],
                                 capture_output=True, text=True)
         if result.returncode != 0:
             print("❌ Migration failed!")
@@ -176,7 +183,7 @@ def main():
 
     # Load seed data
     print("\n🌱 Loading seed data...")
-    result = subprocess.run(['uv', 'run', 'seed_data.py'],
+    result = subprocess.run(['uv', 'run', str(script_dir / 'seed_data.py')],
                             capture_output=True, text=True)
     if result.returncode != 0:
         print("❌ Seed data failed!")

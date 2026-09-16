@@ -11,7 +11,7 @@ import boto3
 
 sys.stdout.reconfigure(encoding="utf-8")
 from botocore.exceptions import ClientError
-from src.schemas import InstrumentCreate
+from alex_database import InstrumentCreate
 from pydantic import ValidationError
 from dotenv import load_dotenv
 
