@@ -85,3 +85,7 @@ frontend/.env.production.local
 
 # Logs
 *.log
+
+*.md
+!README.md
+
